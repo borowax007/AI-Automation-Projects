@@ -1,48 +1,66 @@
-# AI Email Assistant
+# 🤖 AI Email Assistant — Multimodal AI Email Automation
 
-## Overview
+An AI-powered email assistant built with **n8n** that allows users to compose and send professional emails using either **text or voice messages**.
 
-An AI-powered email assistant built with n8n that can understand user instructions, identify the appropriate recipient, draft professional emails, and send them automatically.
+The system interprets the user's request, processes voice messages through speech-to-text transcription when necessary, uses an AI Agent to understand the instruction, identifies the intended recipient, drafts the email, sends it through Gmail, and provides confirmation to the user after successful delivery.
 
-## Features
+---
 
-- AI-powered email drafting
-- Recipient identification
-- Professional email generation
-- Automated email sending
-- Natural-language instructions
-- Workflow automation
-- API/tool integration
+## 🚀 Project Overview
 
-## Workflow
+Traditional email workflows require users to manually open an email application, identify the recipient, compose the message, and send it.
 
-User Request
-    ↓
-AI Agent
-    ↓
-Identify Recipient
-    ↓
-Draft Email
-    ↓
-Review/Process
-    ↓
-Send Email
-    ↓
-Confirmation
+This project automates that process using an **AI Agent and n8n workflow automation**.
 
-## Technologies
+Users can simply send a natural-language instruction such as:
 
-- n8n
-- AI Agent
-- Large Language Model
-- Email API
-- Google Contacts / Contact Database
-- Workflow Automation
+> "Send an email to John telling him that our meeting has been moved to Friday."
 
-## Purpose
+Or use a voice message:
 
-This project demonstrates the ability to design and implement AI-powered business process automation using n8n and AI agents.
+> 🎤 "Send an email to John and let him know I'll be available for the meeting on Friday afternoon."
 
-## Author
+The system processes the request and handles the email workflow automatically.
 
-Ayobode Omobosoye
+---
+
+# ✨ Key Features
+
+### 📝 Text-Based Email Requests
+
+Users can provide instructions using natural language text.
+
+Example:
+
+```text
+Send an email to Sarah telling her that the project meeting has been moved to 10 AM tomorrow.
+
+Workflow Architecture
+                         USER
+                           │
+                ┌──────────┴──────────┐
+                │                     │
+             TEXT MESSAGE        VOICE MESSAGE
+                │                     │
+                │                Audio Processing
+                │                     │
+                │                Transcription
+                │                     │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                      AI AGENT
+                           │
+                ┌──────────┴──────────┐
+                │                     │
+          MyContacts Tool       SendEmail Tool
+                │                     │
+                ▼                     ▼
+        Find Recipient              Gmail
+        Email Address            Email Delivery
+                                      │
+                                      ▼
+                              Confirmation Message
+                                      │
+                                      ▼
+                                    USER
