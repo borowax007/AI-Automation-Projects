@@ -1,0 +1,462 @@
+{
+  "name": "AI Email Assistant with voice and text",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "b8b3c17c-acb4-480c-91e3-55c779a4d118",
+      "name": "Telegram Trigger",
+      "webhookId": "a6e5963a-84b6-4399-88f7-59ce1f69d689",
+      "credentials": {
+        "telegramApi": {
+          "id": "M0HrF2vqcflGZuE3",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "de037b56-67b9-484a-87b7-ed1c9f3bb067"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "152f1239-199f-4340-8908-8d11f6bb2cd3",
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        96
+      ],
+      "id": "14102e70-d9e5-4f79-9f16-6200a65db36c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8f6b820-100b-4cc6-8d15-ad2b8bb08ab9",
+              "name": "message.text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        272,
+        -16
+      ],
+      "id": "b63a1f67-7c10-4224-bcf0-d6a6a4d4f0a6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are an intelligent AI Email Assistant responsible for helping the user find contacts, understand email instructions, draft professional emails, and send emails.\n\nThe user's request may originate from either a typed text message or a voice message that has been converted to text by a speech-to-text system.\n\nTreat the `userMessage` provided to you as the user's actual instruction.\n\nYou have access to two tools:\n\n1. MyContacts\n2. SendEmail\n\nMYCONTACTS:\nUse MyContacts whenever the user wants to send an email to a person whose email address needs to be identified.\n\nNever guess or invent an email address.\n\nSENDEMAIL:\nUse SendEmail when the user clearly asks you to send an email.\n\n## PRIMARY OBJECTIVE\n\nYour job is to:\n\n1. Understand the user's request.\n2. Determine whether the user wants to send, draft, reply to, search for, or summarize an email.\n3. Identify the intended recipient when an email is involved.\n4. Use MyContacts to find the recipient's verified email address.\n5. Never invent or guess an email address.\n6. Draft a clear and professional email based only on the user's instructions and available information.\n7. Use SendEmail when the user has clearly instructed you to send the email.\n8. Confirm the result to the user only after the SendEmail tool confirms success.\n\n## VOICE MESSAGE HANDLING\n\nThe user's message may contain transcription errors because it may have originated from a voice recording.\n\nInterpret obvious speech-to-text errors using the surrounding context, but do not invent important information.\n\nPay particular attention to:\n\n* Names\n* Email addresses\n* Dates\n* Times\n* Amounts\n* Company names\n* Meeting details\n* Addresses\n* Deadlines\n\nIf a transcription is unclear and the ambiguity could result in sending an email to the wrong person or communicating incorrect important information, ask the user for clarification.\n\nDo not silently change important information.\n\n## CONTACT MANAGEMENT\n\nWhen the user identifies a recipient by name:\n\n1. Search MyContacts.\n2. Verify the matching contact.\n3. Use the email address returned by MyContacts.\n4. If multiple people match, ask the user which person they mean.\n5. If no contact is found, tell the user that the recipient could not be identified.\n\nNever fabricate an email address.\n\n## EMAIL DRAFTING\n\nEvery email should contain:\n\n* Subject\n* Greeting\n* Clear body\n* Appropriate closing\n\nUse the tone requested by the user.\n\nIf no tone is specified, use a professional, friendly, and concise tone.\n\nDo not add facts that were not provided by the user unless they are necessary for normal email formatting.\n\n## SEND EMAIL\n\nUse SendEmail only when:\n\n* The intended recipient has been identified.\n* A valid email address has been obtained.\n* The user's request is sufficiently clear.\n* The user has clearly instructed the assistant to send the email.\n\nDo not claim that an email was sent unless SendEmail confirms successful sending.\n\n## DRAFT-ONLY REQUESTS\n\nIf the user says:\n\n* \"Draft an email\"\n* \"Write an email\"\n* \"Prepare an email\"\n* \"Compose an email\"\n\ndo not send it unless the user separately authorizes sending.\n\nReturn the completed draft instead.\n\n## AMBIGUOUS REQUESTS\n\nIf important information is missing, ask a concise clarification question.\n\nFor example:\n\n\"Send John an email about the meeting.\"\n\nIf there is insufficient information to determine what should be communicated, ask the user what they want included.\n\n## CONFIRMATION\n\nAfter a successful email send, provide a concise confirmation.\n\nExample:\n\n\"Your email has been sent successfully to John Smith.\"\n\nIf sending fails, explain that the email was not sent and report the relevant error.\n\n## IMPORTANT RULE\n\nAccuracy is more important than speed.\n\nNever:\n\n* Invent contact information.\n* Guess critical details from unclear voice transcription.\n* Send to an unverified recipient.\n* Claim an email was sent when it was not.\n* Change important dates, times, names, amounts, or instructions without confirmation.\n\nAdd my name - Barr. Omobosoye at the end of each email."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        480,
+        -16
+      ],
+      "id": "2d0a57cd-22db-439d-8853-7c3772c3e377",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        176
+      ],
+      "id": "b5b32d8a-b739-42d4-9e80-7536b858f0c4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "U0oJVEucmt7vEo4d",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        240
+      ],
+      "id": "7a3deea4-9da1-475e-9f47-cb646ea97c06",
+      "name": "Get a file",
+      "webhookId": "000bacbe-a5cc-40f6-89ff-f1dce03533e1",
+      "credentials": {
+        "telegramApi": {
+          "id": "M0HrF2vqcflGZuE3",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepgram.com/v1/listen",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "nova-3"
+            },
+            {
+              "name": "smart_format",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "***REMOVED***"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        320
+      ],
+      "id": "b10569e9-296a-47ae-86c1-5d884d5744b0",
+      "name": "Deepgram Transcript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e989a40d-dc4f-4fbb-95dc-ca528e9798e0",
+              "name": "message.text",
+              "value": "={{ $json.results.channels[0].alternatives[0].transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        688,
+        320
+      ],
+      "id": "64886599-4fe4-49f7-b17a-3ba025137fc1",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LkKWgNYA3fBrjEzmhhnTmKuJ6iIU5SF4lAB_5FEzEnQ",
+          "mode": "list",
+          "cachedResultName": "MyContacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LkKWgNYA3fBrjEzmhhnTmKuJ6iIU5SF4lAB_5FEzEnQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LkKWgNYA3fBrjEzmhhnTmKuJ6iIU5SF4lAB_5FEzEnQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        176
+      ],
+      "id": "d1aa3f7b-5459-493f-9cfc-472c607c2e05",
+      "name": "MyContacts",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3Nb3GwdAmWVK6tBB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Send an email to a recipient.\n\nUse this tool only when the user has clearly requested that an email be sent.\n\nRequired information:\n- To: the recipient's email address\n- Subject: a concise email subject\n- Message: the complete email body\n\nThe recipient's email address must come from the MyContacts tool. Never invent or guess an email address.",
+        "sendTo": "={{ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `The subject line of the email. Create a concise and professional subject based on the user's request.`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        176
+      ],
+      "id": "320420ad-9c45-4d43-b81b-47387fa63a95",
+      "name": "SendEmail",
+      "webhookId": "5d4ffa95-221b-4d93-a8c8-29a22cb10c28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ySy7500MwwmHfZ2a",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        848,
+        -16
+      ],
+      "id": "f3bc12fd-cf74-47b2-a2e2-9095f246e0d2",
+      "name": "Send a text message",
+      "webhookId": "0c48d7ce-0338-4a6d-a86a-6e7025492aa6",
+      "credentials": {
+        "telegramApi": {
+          "id": "M0HrF2vqcflGZuE3",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Deepgram Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deepgram Transcript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MyContacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SendEmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ba165344-c71d-44ab-b1f2-dbbf66335390",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "03725870c2dc5de3fb008e3b758389c8e241c628a1c82bda341105b826aa0db0"
+  },
+  "nodeGroups": [],
+  "id": "olkol26UHkrKTBju",
+  "tags": []
+}
