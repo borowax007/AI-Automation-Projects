@@ -201,7 +201,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "***REMOVED***"
+              "value": "REPLACE_WITH_N8N_CREDENTIAL"
             }
           ]
         },
